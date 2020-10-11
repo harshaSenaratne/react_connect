@@ -8,8 +8,10 @@ class Channels extends React.Component{
     state={
         channels:[],
         modal:false,
+        activChannel:"",
         channelName:"",
         channelInfo:"",
+        initalLoad:true,
         user:this.props.currentUser,
         channelReference:firebase.database().ref("channels")
 
@@ -19,11 +21,24 @@ class Channels extends React.Component{
         this.channelUpdateListner()
     }
 
+    //channel that renders in the initial render
+    setDefaultChannel=()=>{
+        const {initalLoad,channels} = this.state;
+        const firstChannel = channels[0];
+
+            if(initalLoad && channels.length>0 ){
+                this.props.setCurrentChannel(firstChannel);
+                this.setActiveChannel(firstChannel);
+            }
+            this.setState({initalLoad:false});
+    }
+
+
     channelUpdateListner=()=>{
         let loadChannel=[];
         this.state.channelReference.on('child_added',snap=>{
             loadChannel.push(snap.val());
-            this.setState({channels:loadChannel})
+            this.setState({channels:loadChannel},()=>this.setDefaultChannel())
             console.log(loadChannel);
         })
     }
@@ -72,6 +87,7 @@ class Channels extends React.Component{
         channels.length >0 && channels.map(ch=>(
             <Menu.Item
                 key={ch.id}
+                active={ch.id === this.state.activChannel}
                 onClick={()=> this.changeChannel(ch)}
                 name={ch.name}
                 style={{opacity:0.7}}>
@@ -83,7 +99,12 @@ class Channels extends React.Component{
     )
 
     changeChannel = (channel) =>{
+        this.props.setCurrentChannel(channel);
+        this.setActiveChannel(channel);
+    }
 
+    setActiveChannel=(channel)=>{
+        this.setState({activChannel:channel.id});
     }
 
     render(){
