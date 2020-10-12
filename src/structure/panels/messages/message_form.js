@@ -1,6 +1,7 @@
 import React from 'react'
 import {Segment,Button,Input} from 'semantic-ui-react'
 import firebase from '../../../firebase'
+import FileModal from './file_modal'
 
 class MessageForm extends React.Component{
     state={
@@ -8,12 +9,26 @@ class MessageForm extends React.Component{
         channel:this.props.currentChannel,
         user:this.props.currentUser,
         loading:false,
-        errors:[]
+        errors:[],
+        modal:false
 
     }
 
+
 handleChange = event=>{
     this.setState({[event.target.name]:event.target.value});
+}
+
+openModal =()=>{
+    this.setState({
+        modal:true
+    })
+}
+
+closeModal =()=>{
+    this.setState({
+        modal:false
+    })
 }
 
 createMessage =()=>{
@@ -30,6 +45,10 @@ createMessage =()=>{
         }
     };
     return message;
+}
+
+uploadFile = (file,meta_data) =>{
+    console.log(file,meta_data);
 }
 
 sendMessage = ()=>{
@@ -60,13 +79,14 @@ sendMessage = ()=>{
     }
 }
     render(){
-        const {errors} = this.state;
+        const {errors,message,loading,modal} = this.state;
         return (
                 <Segment className="message_form">
                     <Input
                     fluid
                     name="message"
                     onChange={this.handleChange}
+                    value={message}
                     className={
                         errors.some(err => err.message.includes('message'))?'error' :''
                     }
@@ -84,17 +104,26 @@ sendMessage = ()=>{
                             content="Add Reply"
                             labelPosition="left"
                             icon="edit"
+                            disabled={loading}
                             onClick={this.sendMessage}
                             
                             />
 
                     <Button color="teal"
+                        onClick={this.openModal}
                             content="Upload Media"
                             labelPosition="right"
                             icon="cloud upload"
                             
                             />
 
+                    <FileModal
+                    modal={modal}
+                    uploadFile={this.uploadFile}
+                    closeModal={this.closeModal}
+                    />
+
+                    
           
 
                     
